@@ -156,6 +156,7 @@ def _auto_add_newsletter(
     new_newsletter_schema = NewsletterCreate(
         name=newsletter_name,
         sender_emails=[sender],
+        extract_content=settings.auto_extract_content,
     )
     return create_newsletter(db, new_newsletter_schema)
 

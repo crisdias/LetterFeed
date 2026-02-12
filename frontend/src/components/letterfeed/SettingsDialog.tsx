@@ -280,6 +280,19 @@ export function SettingsDialog({
                 Auto-add new senders
               </Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="auto-extract"
+                checked={currentSettings.auto_extract_content}
+                onCheckedChange={(checked) =>
+                  handleSettingsChange("auto_extract_content", !!checked)
+                }
+                disabled={settings.locked_fields.includes("auto_extract_content")}
+              />
+              <Label htmlFor="auto-extract" className="text-sm font-normal">
+                Auto-extract main content from emails
+              </Label>
+            </div>
           </div>
         </div>
         <DialogFooter>

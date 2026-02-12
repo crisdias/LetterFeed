@@ -13,6 +13,7 @@ class SettingsBase(BaseModel):
     mark_as_read: bool = False
     email_check_interval: int = 15
     auto_add_new_senders: bool = False
+    auto_extract_content: bool = True
     auth_username: str | None = None
 
 

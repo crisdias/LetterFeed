@@ -45,6 +45,7 @@ export interface Settings {
     mark_as_read: boolean;
     email_check_interval: number;
     auto_add_new_senders: boolean;
+    auto_extract_content: boolean;
     locked_fields: string[];
 }
 
@@ -57,6 +58,7 @@ export interface SettingsCreate {
     mark_as_read: boolean;
     email_check_interval: number;
     auto_add_new_senders: boolean;
+    auto_extract_content: boolean;
 }
 
 
