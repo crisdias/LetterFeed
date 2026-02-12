@@ -47,6 +47,12 @@ def test_generate_master_feed(db_session: Session):
     assert root.find("atom:title", ns).text == "LetterFeed: All Newsletters"
     assert root.find("atom:id", ns).text == "urn:letterfeed:master"
 
+    # Verify self link uses /api/feeds/all
+    links = root.findall("atom:link", ns)
+    self_link = next((link for link in links if link.get("rel") == "self"), None)
+    assert self_link is not None
+    assert "/api/feeds/all" in self_link.get("href")
+
     entry_titles = {
         entry.find("atom:title", ns).text for entry in root.findall("atom:entry", ns)
     }
@@ -91,9 +97,13 @@ def test_generate_feed(db_session: Session):
     assert root.find("atom:logo", ns).text.endswith("/logo.png")
     assert root.find("atom:icon", ns).text.endswith("/favicon.ico")
 
-    # Check for the alternate link
+    # Check for links
     links = root.findall("atom:link", ns)
     assert any(link.get("rel") == "alternate" and link.get("href") for link in links)
+    # Verify self link uses /api/feeds/ prefix
+    self_link = next((link for link in links if link.get("rel") == "self"), None)
+    assert self_link is not None
+    assert "/api/feeds/" in self_link.get("href")
 
     # Check for entries
     entry_titles = [
@@ -155,7 +165,7 @@ def test_generate_opml(db_session: Session):
     # Check first newsletter - verify URL points to existing feed
     outline1 = next((o for o in outlines if o.get("text") == "Newsletter A"), None)
     assert outline1 is not None
-    assert outline1.get("type") == "rss"
+    assert outline1.get("type") == "atom"
     assert outline1.get("title") == "Newsletter A"
     xml_url_1 = outline1.get("xmlUrl")
     assert "/api/feeds/newsletter-a" in xml_url_1
@@ -166,7 +176,7 @@ def test_generate_opml(db_session: Session):
     # Check second newsletter - verify URL points to existing feed
     outline2 = next((o for o in outlines if o.get("text") == "Newsletter B"), None)
     assert outline2 is not None
-    assert outline2.get("type") == "rss"
+    assert outline2.get("type") == "atom"
     assert outline2.get("title") == "Newsletter B"
     xml_url_2 = outline2.get("xmlUrl")
     assert "/api/feeds/" in xml_url_2

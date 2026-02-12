@@ -148,7 +148,7 @@ If you have a fork or want to build from source in production:
 
     ```bash
     # Build from local source
-    docker compose -f docker-compose.dev.yml up -d
+    docker compose -f docker-compose.dev.yml up -d --build
     ```
 
 ### Key Environment Variable Differences

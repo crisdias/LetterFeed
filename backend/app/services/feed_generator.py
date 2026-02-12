@@ -60,7 +60,7 @@ def generate_feed(db: Session, feed_identifier: str):
 
     entries = get_entries_by_newsletter(db, newsletter.id)
 
-    feed_url = f"{settings.app_base_url}/feeds/{newsletter.slug or newsletter.id}"
+    feed_url = f"{settings.app_base_url}/api/feeds/{newsletter.slug or newsletter.id}"
     sender_emails = ", ".join([s.email for s in newsletter.senders])
     description = f"A feed of newsletters from {sender_emails}"
 
@@ -80,7 +80,7 @@ def generate_master_feed(db: Session):
     """Generate a master Atom feed for all newsletters."""
     entries = get_all_entries(db)
 
-    feed_url = f"{settings.app_base_url}/feeds/all"
+    feed_url = f"{settings.app_base_url}/api/feeds/all"
 
     fg = _create_feed_generator(
         feed_id="urn:letterfeed:master",
@@ -112,7 +112,7 @@ def generate_opml(db: Session):
         SubElement(
             body,
             "outline",
-            type="rss",
+            type="atom",
             text=newsletter.name,
             title=newsletter.name,
             xmlUrl=feed_url,
