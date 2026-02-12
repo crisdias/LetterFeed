@@ -43,6 +43,9 @@ def _add_entries_to_feed(
         )
         fe.content(entry.body, type="html")
 
+        # Add author (newsletter name)
+        fe.author({"name": entry.newsletter.name})
+
         if entry.received_at.tzinfo is None:
             timezone_aware_received_at = entry.received_at.replace(tzinfo=tz.tzutc())
             fe.published(timezone_aware_received_at)

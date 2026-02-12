@@ -59,6 +59,13 @@ def test_generate_master_feed(db_session: Session):
     assert "[Newsletter A] Entry A1" in entry_titles
     assert "[Newsletter B] Entry B1" in entry_titles
 
+    # Verify all entries have author field
+    entries = root.findall("atom:entry", ns)
+    for entry_elem in entries:
+        author = entry_elem.find("atom:author/atom:name", ns)
+        assert author is not None
+        assert author.text in ["Newsletter A", "Newsletter B"]
+
 
 def test_generate_feed(db_session: Session):
     """Test the feed generation for a newsletter with entries."""
@@ -118,6 +125,11 @@ def test_generate_feed(db_session: Session):
         first_entry_element.find("atom:content", ns).text
         == "<p>This is the first entry.</p>"
     )
+
+    # Verify author field is present
+    author = first_entry_element.find("atom:author/atom:name", ns)
+    assert author is not None
+    assert author.text == newsletter.name
 
 
 def test_generate_feed_nonexistent_newsletter(db_session: Session):
