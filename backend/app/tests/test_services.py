@@ -152,16 +152,25 @@ def test_generate_opml(db_session: Session):
     outlines = body.findall("outline")
     assert len(outlines) == 2
 
-    # Check first newsletter
+    # Check first newsletter - verify URL points to existing feed
     outline1 = next((o for o in outlines if o.get("text") == "Newsletter A"), None)
     assert outline1 is not None
     assert outline1.get("type") == "rss"
     assert outline1.get("title") == "Newsletter A"
-    assert "newsletter-a" in outline1.get("xmlUrl")
+    xml_url_1 = outline1.get("xmlUrl")
+    assert "/api/feeds/newsletter-a" in xml_url_1
+    # Verify the feed actually exists by generating it
+    feed1 = generate_feed(db_session, "newsletter-a")
+    assert feed1 is not None
 
-    # Check second newsletter
+    # Check second newsletter - verify URL points to existing feed
     outline2 = next((o for o in outlines if o.get("text") == "Newsletter B"), None)
     assert outline2 is not None
     assert outline2.get("type") == "rss"
     assert outline2.get("title") == "Newsletter B"
-    assert nl2.id in outline2.get("xmlUrl")
+    xml_url_2 = outline2.get("xmlUrl")
+    assert "/api/feeds/" in xml_url_2
+    assert nl2.id in xml_url_2
+    # Verify the feed actually exists by generating it
+    feed2 = generate_feed(db_session, nl2.id)
+    assert feed2 is not None

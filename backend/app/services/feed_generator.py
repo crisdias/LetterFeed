@@ -107,7 +107,7 @@ def generate_opml(db: Session):
     body = SubElement(opml, "body")
 
     for newsletter in newsletters:
-        feed_url = f"{settings.app_base_url}/feeds/{newsletter.slug or newsletter.id}"
+        feed_url = f"{settings.app_base_url}/api/feeds/{newsletter.slug or newsletter.id}"
 
         SubElement(
             body,
