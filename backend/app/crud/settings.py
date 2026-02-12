@@ -98,7 +98,7 @@ def create_or_update_settings(db: Session, settings: SettingsCreate):
         db_settings = SettingsModel()
         db.add(db_settings)
 
-    update_data = settings.model_dump(exclude_unset=True)
+    update_data = settings.model_dump(exclude_none=True)
 
     # Do not update fields that are set by environment variables
     locked_fields = list(env_settings.model_dump(exclude_unset=True).keys())
