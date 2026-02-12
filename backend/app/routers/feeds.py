@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.logging import get_logger
-from app.services.feed_generator import generate_feed, generate_master_feed
+from app.services.feed_generator import generate_feed, generate_master_feed, generate_opml
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -17,6 +17,15 @@ def get_master_feed(db: Session = Depends(get_db)):
     feed = generate_master_feed(db)
     logger.info("Successfully generated master feed")
     return Response(content=feed, media_type="application/atom+xml")
+
+
+@router.get("/feeds/opml")
+def get_opml_feed(db: Session = Depends(get_db)):
+    """Generate an OPML file with all newsletter feeds."""
+    logger.info("Generating OPML file for all newsletters")
+    opml = generate_opml(db)
+    logger.info("Successfully generated OPML file")
+    return Response(content=opml, media_type="application/xml")
 
 
 @router.get("/feeds/{feed_identifier}")

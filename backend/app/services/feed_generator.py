@@ -1,4 +1,5 @@
 from typing import List
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 from dateutil import tz
 from feedgen.feed import FeedGenerator
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.crud.entries import get_all_entries, get_entries_by_newsletter
-from app.crud.newsletters import get_newsletter_by_identifier
+from app.crud.newsletters import get_newsletter_by_identifier, get_newsletters
 from app.models.entries import Entry
 
 
@@ -91,3 +92,36 @@ def generate_master_feed(db: Session):
     _add_entries_to_feed(fg, entries, is_master_feed=True)
 
     return fg.atom_str(pretty=True)
+
+
+def generate_opml(db: Session):
+    """Generate an OPML file with all newsletter feeds."""
+    from xml.dom import minidom
+
+    newsletters = get_newsletters(db)
+
+    opml = Element("opml", version="2.0")
+    head = SubElement(opml, "head")
+    SubElement(head, "title").text = "LetterFeed Newsletters"
+
+    body = SubElement(opml, "body")
+
+    for newsletter in newsletters:
+        feed_url = f"{settings.app_base_url}/feeds/{newsletter.slug or newsletter.id}"
+
+        SubElement(
+            body,
+            "outline",
+            type="rss",
+            text=newsletter.name,
+            title=newsletter.name,
+            xmlUrl=feed_url,
+            htmlUrl=settings.app_base_url,
+        )
+
+    # Format with proper indentation
+    xml_string = tostring(opml, encoding="unicode")
+    dom = minidom.parseString(xml_string)
+    pretty_xml = dom.toprettyxml(indent="  ", encoding="UTF-8")
+
+    return pretty_xml

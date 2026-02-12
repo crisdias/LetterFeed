@@ -214,3 +214,7 @@ export function getFeedUrl(newsletter: Newsletter): string {
 export function getMasterFeedUrl(): string {
     return `${API_BASE_URL}/feeds/all`;
 }
+
+export function getOpmlUrl(): string {
+    return `${API_BASE_URL}/feeds/opml`;
+}

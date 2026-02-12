@@ -7,7 +7,7 @@ from app.crud.entries import create_entry
 from app.crud.newsletters import create_newsletter
 from app.schemas.entries import EntryCreate
 from app.schemas.newsletters import NewsletterCreate
-from app.services.feed_generator import generate_feed, generate_master_feed
+from app.services.feed_generator import generate_feed, generate_master_feed, generate_opml
 
 
 def test_generate_master_feed(db_session: Session):
@@ -114,3 +114,54 @@ def test_generate_feed_nonexistent_newsletter(db_session: Session):
     """Test feed generation for a non-existent newsletter."""
     feed_xml = generate_feed(db_session, "nonexistent-id")
     assert feed_xml is None
+
+
+def test_generate_opml(db_session: Session):
+    """Test the OPML generation for all newsletters."""
+    # Create newsletters
+    nl1 = create_newsletter(
+        db_session,
+        NewsletterCreate(
+            name="Newsletter A", slug="newsletter-a", sender_emails=["a@example.com"]
+        ),
+    )
+    nl2 = create_newsletter(
+        db_session,
+        NewsletterCreate(name="Newsletter B", sender_emails=["b@example.com"]),
+    )
+
+    # Generate OPML
+    opml_xml = generate_opml(db_session)
+    assert opml_xml is not None
+
+    # Parse and verify
+    root = ET.fromstring(opml_xml)
+    assert root.tag == "opml"
+    assert root.get("version") == "2.0"
+
+    # Check head
+    head = root.find("head")
+    assert head is not None
+    title = head.find("title")
+    assert title is not None
+    assert title.text == "LetterFeed Newsletters"
+
+    # Check body
+    body = root.find("body")
+    assert body is not None
+    outlines = body.findall("outline")
+    assert len(outlines) == 2
+
+    # Check first newsletter
+    outline1 = next((o for o in outlines if o.get("text") == "Newsletter A"), None)
+    assert outline1 is not None
+    assert outline1.get("type") == "rss"
+    assert outline1.get("title") == "Newsletter A"
+    assert "newsletter-a" in outline1.get("xmlUrl")
+
+    # Check second newsletter
+    outline2 = next((o for o in outlines if o.get("text") == "Newsletter B"), None)
+    assert outline2 is not None
+    assert outline2.get("type") == "rss"
+    assert outline2.get("title") == "Newsletter B"
+    assert nl2.id in outline2.get("xmlUrl")
